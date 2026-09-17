@@ -2,7 +2,13 @@ Set-StrictMode -Version Latest
 
 function Normalize-Slot { [CmdletBinding()] param([Parameter(Mandatory)][string]$Slot) $s=$Slot.Trim().ToLowerInvariant().TrimStart('_'); if($s -notin @('a','b')){throw "Unsupported A/B slot: $Slot"}; return $s }
 function Get-BootPartitionName { [CmdletBinding()] param([Parameter(Mandatory)][string]$Slot) return 'boot_' + (Normalize-Slot $Slot) }
-function Get-Sha256 { [CmdletBinding()] param([Parameter(Mandatory)][string]$Path) if(-not(Test-Path -LiteralPath $Path -PathType Leaf)){throw "Artifact not found: $Path"}; return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant() }
+function Get-Sha256 {
+ [CmdletBinding()] param([Parameter(Mandatory)][string]$Path)
+ if(-not(Test-Path -LiteralPath $Path -PathType Leaf)){throw "Artifact not found: $Path"}
+ $fs=[IO.File]::Open($Path,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+ $sha=[Security.Cryptography.SHA256]::Create()
+ try { $bytes=$sha.ComputeHash($fs); return (($bytes|ForEach-Object{$_.ToString('x2')}) -join '') } finally { $sha.Dispose(); $fs.Dispose() }
+}
 function Assert-ArtifactHash { [CmdletBinding()] param([Parameter(Mandatory)][string]$Path,[Parameter(Mandatory)][string]$ExpectedSha256) if($ExpectedSha256 -notmatch '^[0-9a-fA-F]{64}$'){throw "Invalid SHA256: $ExpectedSha256"}; $actual=Get-Sha256 $Path; if($actual -ne $ExpectedSha256.ToLowerInvariant()){throw "SHA256 mismatch for $Path. Expected=$ExpectedSha256 Actual=$actual"}; return $true }
 
 function Test-DeviceProfile {
