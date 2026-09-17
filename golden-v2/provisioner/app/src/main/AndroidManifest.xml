@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+
+    <application
+        android:allowBackup="false"
+        android:directBootAware="true"
+        android:label="AEiOU Golden Provisioner"
+        android:supportsRtl="false">
+        <receiver
+            android:name=".BootReceiver"
+            android:directBootAware="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".InstallResultReceiver"
+            android:directBootAware="true"
+            android:exported="false" />
+
+        <service
+            android:name=".ProvisionJobService"
+            android:directBootAware="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+    </application>
+</manifest>
