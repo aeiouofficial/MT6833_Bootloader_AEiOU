@@ -36,4 +36,11 @@ foreach($bad in 'fastboot flash','adb reboot','format userdata','wipeData','flas
 foreach($need in 'source-product.img','e2fsck','sha256sum','debugfs'){
  if($build -notmatch [regex]::Escape($need)){throw "missing offline build token: $need"}
 }
+foreach($need in 'AvbToolPath','VbmetaImage','VbmetaSystemImage','erase_footer','add_hashtree_footer','--do_not_generate_fec','--partition_name','product','HASHTREE_DISABLED'){
+ if($build -notmatch [regex]::Escape($need)){throw "missing AVB safety token: $need"}
+}
+if($build -notmatch [regex]::Escape("IFS='|'")){throw 'builder must use a non-collapsing field separator'}
+if($build -match '\$''\\t'''){throw 'tab-separated app transport is forbidden because empty fields collapse in bash read'}
+if($build -notmatch 'native stderr'){throw 'PowerShell wrapper must tolerate native stderr and gate on process exit code'}
+if($build -notmatch 'verify_alias'){throw 'AVB verification must use a product.img alias matching the descriptor partition name'}
 Write-Host 'GOLDEN-ROM-V2 CONTRACT TESTS PASSED'

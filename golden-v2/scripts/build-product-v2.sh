@@ -6,17 +6,26 @@ provisioner_apk="$3"
 apps_json="$4"
 permissions_xml="$5"
 tsv="$6"
+avbtool="$7"
 source_img="$capture_root/source-product.img"
-for tool in debugfs e2fsck tune2fs sha256sum; do
+for tool in debugfs e2fsck tune2fs sha256sum python3; do
   command -v "$tool" >/dev/null 2>&1 || { echo "missing tool: $tool" >&2; exit 20; }
 done
-for f in "$source_img" "$provisioner_apk" "$apps_json" "$permissions_xml" "$tsv"; do
+for f in "$source_img" "$provisioner_apk" "$apps_json" "$permissions_xml" "$tsv" "$avbtool"; do
   [[ -f "$f" ]] || { echo "missing input: $f" >&2; exit 21; }
 done
 if ! e2fsck -fn "$source_img" >/tmp/aeiou-v2-source-fsck.log 2>&1; then
   cat /tmp/aeiou-v2-source-fsck.log >&2
   exit 22
 fi
+source_avb="$(python3 "$avbtool" info_image --image "$source_img")"
+partition_size="$(awk -F: '/^Image size:/{gsub(/ bytes| /,"",$2);print $2;exit}' <<<"$source_avb")"
+salt="$(awk -F: '/^[[:space:]]+Salt:/{gsub(/ /,"",$2);print $2;exit}' <<<"$source_avb")"
+hash_alg="$(awk -F: '/^[[:space:]]+Hash Algorithm:/{gsub(/ /,"",$2);print $2;exit}' <<<"$source_avb")"
+os_version="$(sed -n "s/.*com.android.build.product.os_version -> '\([^']*\)'.*/\1/p" <<<"$source_avb" | head -1)"
+fingerprint="$(sed -n "s/.*com.android.build.product.fingerprint -> '\([^']*\)'.*/\1/p" <<<"$source_avb" | head -1)"
+security_patch="$(sed -n "s/.*com.android.build.product.security_patch -> '\([^']*\)'.*/\1/p" <<<"$source_avb" | head -1)"
+[[ "$partition_size" =~ ^[0-9]+$ && -n "$salt" && -n "$hash_alg" && -n "$os_version" && -n "$fingerprint" && -n "$security_patch" ]] || { echo 'cannot parse source AVB hashtree metadata' >&2; exit 37; }
 cp --reflink=auto "$source_img" "$candidate"
 work="$(mktemp -d /tmp/aeiou-golden-v2.XXXXXX)"
 trap 'rm -rf "$work"' EXIT
@@ -49,7 +58,7 @@ add_dir /priv-app/AEiOUGoldenProvisioner
 add_file "$apps_json" /etc/aeiou-golden/apps.json apps.json
 add_file "$permissions_xml" /etc/permissions/privapp-permissions-aeiou-golden.xml perms.xml
 add_file "$provisioner_apk" /priv-app/AEiOUGoldenProvisioner/AEiOUGoldenProvisioner.apk provisioner.apk
-while IFS=$'\t' read -r mode system_dir apk_name rel_file expected_sha; do
+while IFS='|' read -r mode system_dir apk_name rel_file expected_sha; do
   [[ -n "$mode" ]] || continue
   expected_sha="${expected_sha%$'\r'}"
   src="$capture_root/$rel_file"
@@ -80,7 +89,7 @@ free_bytes=$((free_blocks * block_size))
 if debugfs -R 'stat /app/AEiOU_AppManager' "$candidate" 2>&1 | grep -q 'Inode:'; then
   echo 'forbidden system App Manager path exists' >&2; exit 32
 fi
-while IFS=$'\t' read -r mode system_dir apk_name rel_file expected_sha; do
+while IFS='|' read -r mode system_dir apk_name rel_file expected_sha; do
   [[ -n "$mode" ]] || continue
   expected_sha="${expected_sha%$'\r'}"
   if [[ "$mode" == "system" ]]; then dst="/app/$system_dir/$apk_name"; else dst="/etc/aeiou-golden/apks/$apk_name"; fi
@@ -93,4 +102,15 @@ done < "$tsv"
 for dst in /etc/aeiou-golden/apps.json /etc/permissions/privapp-permissions-aeiou-golden.xml /priv-app/AEiOUGoldenProvisioner/AEiOUGoldenProvisioner.apk; do
   debugfs -R "stat $dst" "$candidate" 2>&1 | grep -q 'Inode:' || { echo "missing embedded file: $dst" >&2; exit 36; }
 done
+python3 "$avbtool" erase_footer --image "$candidate"
+python3 "$avbtool" add_hashtree_footer --image "$candidate" --partition_size "$partition_size" --partition_name product --hash_algorithm "$hash_alg" --salt "$salt" --do_not_generate_fec --algorithm NONE --prop "com.android.build.product.os_version:$os_version" --prop "com.android.build.product.fingerprint:$fingerprint" --prop "com.android.build.product.security_patch:$security_patch"
+verify_dir="$work/avb-verify"
+mkdir -p "$verify_dir"
+verify_alias="$verify_dir/product.img"
+ln -s "$candidate" "$verify_alias"
+python3 "$avbtool" verify_image --image "$verify_alias" >"$work/avb-verify.log" 2>&1 || { cat "$work/avb-verify.log" >&2; exit 38; }
+final_avb="$(python3 "$avbtool" info_image --image "$candidate")"
+grep -Fq 'Partition Name:        product' <<<"$final_avb" || { echo 'final AVB product descriptor missing' >&2; exit 39; }
+final_size="$(stat -c %s "$candidate")"
+[[ "$final_size" == "$partition_size" ]] || { echo "final partition size mismatch: $final_size != $partition_size" >&2; exit 40; }
 echo "GOLDEN_V2_PRODUCT_OK free_bytes=$free_bytes sha256=$(sha256sum "$candidate" | awk '{print $1}')"
