@@ -29,4 +29,9 @@ $all=(Get-Content (Join-Path $root 'golden-rom-capture.ps1') -Raw)+(Get-Content 
 foreach($forbidden in 'fastboot flashing lock','fastboot oem lock','flash vbmeta','--disable-verity','--disable-verification','format userdata','wipeData','set-active-admin','ime set duress.keyboard'){
  if($all -match [regex]::Escape($forbidden)){throw "forbidden golden ROM token: $forbidden"}
 }
+$flash=Get-Content (Join-Path $root 'golden-rom-flash.ps1') -Raw
+foreach($required in "'-S','64M','flash'",'$flashAttempted=$true','sha256sum $remote'){
+ if($flash -notmatch [regex]::Escape($required)){throw "golden flash missing resilience contract: $required"}
+}
+if(([regex]::Matches($flash,[regex]::Escape("'-S','64M','flash'"))).Count -lt 2){throw 'golden flash must use 64M sparse chunks for both candidate and rollback'}
 Write-Host 'GOLDEN-ROM CONTRACT TESTS PASSED'
