@@ -48,21 +48,57 @@ function Get-InstalledVersion([string]$Package){
     if($r.Output -match '(?m)^\s*versionName=([^\r\n]+)\s*$'){return $Matches[1].Trim()}
     return $null
 }
+function Get-GlobalSetting([string]$Name){
+    $r=Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','settings','get','global',$Name) -AllowFailure
+    if($r.ExitCode -ne 0){throw "Unable to read Android global setting: $Name`n$($r.Output)"}
+    return $r.Output.Trim()
+}
+function Restore-GlobalSetting([string]$Name,[string]$Value){
+    if([string]::IsNullOrWhiteSpace($Value) -or $Value -eq 'null'){
+        [void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','settings','delete','global',$Name))
+    } else {
+        [void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','settings','put','global',$Name,$Value))
+    }
+}
+function Invoke-WithTemporaryAdbVerifierBypass([scriptblock]$Action){
+    $names=@('verifier_verify_adb_installs','package_verifier_enable')
+    $before=@{}
+    foreach($name in $names){$before[$name]=Get-GlobalSetting -Name $name}
+    try {
+        foreach($name in $names){[void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','settings','put','global',$name,'0'))}
+        return (& $Action)
+    } finally {
+        foreach($name in $names){Restore-GlobalSetting -Name $name -Value ([string]$before[$name])}
+    }
+}
 foreach($app in $apps){
+    $actual=Get-InstalledVersion -Package ([string]$app.package)
+    if($actual -eq [string]$app.version){
+        Write-Host "PASS: $($app.name) $actual already installed as $($app.package)"
+        if($app.PSObject.Properties['requiresManualSetup'] -and [bool]$app.requiresManualSetup){Write-Warning "$($app.name) requires manual security setup. This script intentionally does not activate Device Admin, change the default IME, change lock credentials, or arm wipe triggers."}
+        continue
+    }
     $path=Join-Path $ArtifactsRoot ([string]$app.file)
     Get-PinnedArtifact -Entry $app -Path $path
     $bypass=$app.PSObject.Properties['bypassLowTargetSdkBlock'] -and [bool]$app.bypassLowTargetSdkBlock
-    $install=$null
-    if($bypass){
-        $remote='/data/local/tmp/aeiou-optional-app.apk'
-        try {
-            [void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('push',$path,$remote))
-            $install=Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','pm','install','--bypass-low-target-sdk-block','-r',$remote)
-        } finally {
-            [void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','rm','-f',$remote) -AllowFailure)
+    $verifierBypass=$app.PSObject.Properties['temporaryAdbVerifierBypass'] -and [bool]$app.temporaryAdbVerifierBypass
+    $installAction={
+        if($bypass){
+            $remote='/data/local/tmp/aeiou-optional-app.apk'
+            try {
+                [void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('push',$path,$remote))
+                return (Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','pm','install','--bypass-low-target-sdk-block','-r',$remote))
+            } finally {
+                [void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','rm','-f',$remote) -AllowFailure)
+            }
         }
+        return (Invoke-NativeChecked -FilePath $adb -ArgumentList @('install','-r',$path))
+    }
+    if($verifierBypass){
+        Write-Warning "$($app.name) uses a temporary ADB package-verifier bypass for this hash-pinned install. Original Android verifier settings are restored in finally."
+        $install=Invoke-WithTemporaryAdbVerifierBypass -Action $installAction
     } else {
-        $install=Invoke-NativeChecked -FilePath $adb -ArgumentList @('install','-r',$path)
+        $install=& $installAction
     }
     if(-not $install -or $install.Output -notmatch '(?im)^Success\s*$'){throw "APK install did not report Success for $($app.name):`n$($install.Output)"}
     $actual=Get-InstalledVersion -Package ([string]$app.package)
