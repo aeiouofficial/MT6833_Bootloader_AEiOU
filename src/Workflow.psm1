@@ -27,7 +27,20 @@ function Resolve-AndroidTool {
 }
 function Invoke-NativeChecked {
  [CmdletBinding()] param([Parameter(Mandatory)][string]$FilePath,[string[]]$ArgumentList=@(),[switch]$AllowFailure)
- $out=(& $FilePath @ArgumentList 2>&1|Out-String); $code=$LASTEXITCODE; if(-not $AllowFailure -and $code -ne 0){throw "Command failed ($code): $FilePath $($ArgumentList -join ' ')`n$out"}; return [pscustomobject]@{Output=$out.TrimEnd();ExitCode=$code}
+ $oldEap=$ErrorActionPreference
+ $ErrorActionPreference='Continue'
+ try {
+     $records=@(& $FilePath @ArgumentList 2>&1)
+     $code=$LASTEXITCODE
+ } finally {
+     $ErrorActionPreference=$oldEap
+ }
+ $lines=foreach($record in $records){
+     if($record -is [System.Management.Automation.ErrorRecord] -and $record.Exception){[string]$record.Exception.Message}else{[string]$record}
+ }
+ $out=($lines -join [Environment]::NewLine)
+ if(-not $AllowFailure -and $code -ne 0){throw "Command failed ($code): $FilePath $($ArgumentList -join ' ')`n$out"}
+ return [pscustomobject]@{Output=$out.TrimEnd();ExitCode=$code}
 }
 function Get-AdbIdentity {
  [CmdletBinding()] param([Parameter(Mandatory)][string]$Adb)

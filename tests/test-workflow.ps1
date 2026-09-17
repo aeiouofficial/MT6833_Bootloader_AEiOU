@@ -19,6 +19,20 @@ Check ($hash -eq '9f64a747e1b97f131fabb6b447296c9b6f0201e79fb3c5356e6c77e89b6a80
 Check (Assert-ArtifactHash -Path $file -ExpectedSha256 $hash) 'accepts exact artifact hash'
 Check (Throws { Assert-ArtifactHash -Path $file -ExpectedSha256 ('0' * 64) | Out-Null }) 'rejects hash mismatch'
 
+$native=Join-Path $temp 'native-stderr.cmd'
+@'
+@echo off
+echo stdout-line
+echo stderr-line 1>&2
+exit /b 0
+'@ | Set-Content -LiteralPath $native -Encoding ASCII
+$nativeResult=$null
+$nativeThrew=$false
+try {$nativeResult=Invoke-NativeChecked -FilePath $native} catch {$nativeThrew=$true}
+Check (-not $nativeThrew) 'accepts native stderr when exit code is zero'
+Check ($nativeResult -and $nativeResult.ExitCode -eq 0) 'preserves native zero exit code'
+Check ($nativeResult -and $nativeResult.Output -match 'stderr-line') 'captures native stderr as output text'
+
 $profile=[pscustomobject]@{ soc='MT6833'; preRomModels=@('M2103K19G'); preRomDevices=@('camellian'); postRomModels=@('M2103K19C','M2103K19G'); postRomDevices=@('camellia','camellian') }
 $pre=[pscustomobject]@{ soc='MT6833'; model='M2103K19G'; device='camellian' }
 $post=[pscustomobject]@{ soc='MT6833'; model='M2103K19C'; device='camellia' }
