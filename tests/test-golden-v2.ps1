@@ -23,10 +23,10 @@ foreach($bad in 'BIND_DEVICE_ADMIN','wipeData','DEVICE_ADMIN','ACTION_INSTALL_PA
 $permXml=Get-Content (Join-Path $v2 'product\privapp-permissions-aeiou-golden.xml') -Raw
 if($permXml -notmatch 'android.permission.INSTALL_PACKAGES'){throw 'privapp allowlist must grant INSTALL_PACKAGES'}
 $java=(Get-ChildItem (Join-Path $v2 'provisioner') -Recurse -File -Filter *.java|ForEach-Object{Get-Content $_.FullName -Raw}) -join "`n"
-foreach($need in 'PackageInstaller','INSTALL_REASON_DEVICE_RESTORE','INSTALL_SCENARIO_DEVICE_RESTORE','SHA-256'){
+foreach($need in 'PackageInstaller','INSTALL_REASON_DEVICE_RESTORE','INSTALL_SCENARIO_BULK','USER_ACTION_NOT_REQUIRED','SHA-256'){
  if($java -notmatch [regex]::Escape($need)){throw "missing provisioner safety token: $need"}
 }
-foreach($bad in 'set-active-admin','wipeData(','DevicePolicyManager','ime set','INSTALL_DISABLE_VERIFICATION'){
+foreach($bad in 'INSTALL_SCENARIO_DEVICE_RESTORE','set-active-admin','wipeData(','DevicePolicyManager','ime set','INSTALL_DISABLE_VERIFICATION'){
  if($java -match [regex]::Escape($bad)){throw "forbidden provisioner code token: $bad"}
 }
 $build=(Get-Content (Join-Path $v2 'build-golden-v2.ps1') -Raw)+(Get-Content (Join-Path $v2 'scripts\build-product-v2.sh') -Raw)
