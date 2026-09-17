@@ -8,10 +8,10 @@ This toolkit is a thin wrapper around the upstream **mtkclient** project by Bjoe
 
 The original community guide that motivated the workflow was published on XDA Developers under the title **Instant Bootloader Unlock Without Losing Data** for POCO M3 Pro 5G / Redmi Note 10 5G devices.
 
-This repository does not claim authorship of mtkclient, its MediaTek exploitation techniques, its DA loaders, or the original XDA procedure. AEiOU-specific work here is limited to the reproducible wrapper, state-safety guards, tests, and documentation derived from hardware debugging on the verified device.
+This repository does not claim authorship of upstream mtkclient, its MediaTek exploitation techniques, its DA loaders, or the original XDA procedure. The bundled fork preserves upstream attribution and GPL-3.0 licensing; AEiOU-specific changes are documented in `vendor/mtkclient/AEIOU_FORK.md`.
 
 ## Dependency boundaries
 
-`setup.ps1` fetches mtkclient directly from its upstream Git repository and checks out the pinned commit. No mtkclient source or binaries are copied into this repository.
+`vendor/mtkclient` contains the exact verified upstream snapshot plus AEiOU stale-state hardening. `setup.ps1` uses this bundled fork directly instead of cloning another copy.
 
 The AEiOU wrapper is MIT-licensed. Files fetched from upstream remain under their upstream license terms.

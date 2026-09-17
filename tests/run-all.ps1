@@ -4,7 +4,8 @@ Set-Location $root
 
 $files = @(
     'setup.ps1','preflight.ps1','unlock.ps1','verify.ps1','src\Toolkit.psm1',
-    'tests\test-toolkit.ps1','tests\test-entrypoints.ps1','tests\test-public-safety.ps1'
+    'tests\test-toolkit.ps1','tests\test-entrypoints.ps1','tests\test-public-safety.ps1',
+    'tests\test-fork.ps1'
 )
 foreach($file in $files){
     $tokens = $null
@@ -18,6 +19,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\test-toolkit.ps1
 if($LASTEXITCODE -ne 0){ exit $LASTEXITCODE }
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\test-entrypoints.ps1
 if($LASTEXITCODE -ne 0){ exit $LASTEXITCODE }
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\test-public-safety.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\test-fork.ps1
+if($LASTEXITCODE -ne 0){ exit $LASTEXITCODE }powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\test-public-safety.ps1
 if($LASTEXITCODE -ne 0){ exit $LASTEXITCODE }
 Write-Host 'ALL REPOSITORY TESTS PASSED'

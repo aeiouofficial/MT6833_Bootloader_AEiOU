@@ -1,7 +1,7 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param([string]$MtkRoot)
 $ErrorActionPreference = 'Stop'
-if(-not $MtkRoot){ $MtkRoot = Join-Path $PSScriptRoot 'tools\mtkclient' }
+if(-not $MtkRoot){ $MtkRoot = Join-Path $PSScriptRoot 'vendor\mtkclient' }
 Import-Module (Join-Path $PSScriptRoot 'src\Toolkit.psm1') -Force
 $Py = Join-Path $MtkRoot '.venv-cli\Scripts\python.exe'
 $Mtk = Join-Path $MtkRoot 'mtk.py'

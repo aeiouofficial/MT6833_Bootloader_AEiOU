@@ -2,7 +2,7 @@
 
 A Windows-first, reproducible bootloader-unlock workflow for MediaTek MT6833 / Dimensity 700 devices using the actively maintained upstream [bkerler/mtkclient](https://github.com/bkerler/mtkclient).
 
-This repository contains **wrapper scripts, safety checks, tests, and documentation**. It does not vendor or redistribute mtkclient.
+This repository contains **the exact mtkclient source snapshot used for the verified unlock, AEiOU hardening, wrapper scripts, safety checks, tests, and documentation**.
 
 ## Verified hardware
 
@@ -83,4 +83,4 @@ This toolkit backs up stale state before every hardware session and never assume
 
 ## License
 
-AEiOU wrapper code: MIT. Upstream mtkclient is GPL-3.0 and remains subject to its own license.
+AEiOU wrapper code is MIT-licensed. The bundled `vendor/mtkclient` fork is derived from bkerler/mtkclient and remains GPL-3.0; see `vendor/mtkclient/LICENSE` and `vendor/mtkclient/AEIOU_FORK.md`.
