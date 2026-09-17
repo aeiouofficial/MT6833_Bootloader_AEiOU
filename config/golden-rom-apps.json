@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "apps": [
+    {"name":"Magisk Manager","package":"com.topjohnwu.magisk","version":"30.7","systemDir":"AEiOU_Magisk","apkName":"Magisk.apk"},
+    {"name":"Obtainium","package":"dev.imranr.obtainium","version":"1.6.17","systemDir":"AEiOU_Obtainium","apkName":"Obtainium.apk"},
+    {"name":"Neo Backup","package":"com.machiav3lli.backup","version":"8.3.18","systemDir":"AEiOU_NeoBackup","apkName":"NeoBackup.apk"},
+    {"name":"Termux","package":"com.termux","version":"0.119.0-beta.3","systemDir":"AEiOU_Termux","apkName":"Termux.apk"},
+    {"name":"App Manager","package":"io.github.muntashirakon.AppManager","version":"4.1.1","systemDir":"AEiOU_AppManager","apkName":"AppManager.apk"},
+    {"name":"Rethink DNS + Firewall","package":"com.celzero.bravedns","version":"v0.5.6","systemDir":"AEiOU_Rethink","apkName":"Rethink.apk"},
+    {"name":"Proton VPN","package":"ch.protonvpn.android","version":"5.20.21.0","systemDir":"AEiOU_ProtonVPN","apkName":"ProtonVPN.apk"},
+    {"name":"DuressKeyboard","package":"duress.keyboard","version":"7.4","systemDir":"AEiOU_DuressKeyboard","apkName":"DuressKeyboard.apk"}
+  ]
+}
