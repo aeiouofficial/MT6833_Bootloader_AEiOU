@@ -39,3 +39,8 @@ Keep the untouched source `boot.img` for every installed ROM build. If a Magisk-
 - It does not use a boot image from a different ROM release.
 - It does not automate PIN entry or Superuser consent.
 - It does not commit generated patched images, ROM ZIPs, GApps ZIPs, or Magisk APKs to Git.
+## Android 16 credential-unlock boundary
+
+On the verified LineageOS 23.2 / Android 16 build, Magisk's normal `MainActivity` is not resolvable before the first credential unlock after reboot. `magiskd` can already be running as root at that point, but the Manager UI remains behind Android Direct Boot. Unlock the device normally once before opening Magisk or approving Superuser policy.
+
+For ADB automation, the verified Shell policy appears as `[SharedUID] Shell` / `com.android.shell` in Magisk's Superuser tab. `postflight.ps1` now requires an actual `su -c id` result containing `uid=0(root)`; a running daemon alone is not accepted as complete root verification.

@@ -75,9 +75,10 @@ for($i=$start;$i -le $end;$i++){
             $args=@{Manifest=$Manifest;ArtifactsRoot=$ArtifactsRoot;AdbPath=$AdbPath;FastbootPath=$FastbootPath}
             if($WhatIfPreference){& (Join-Path $PSScriptRoot 'root-magisk.ps1') @args -WhatIf}else{& (Join-Path $PSScriptRoot 'root-magisk.ps1') @args}
             Save-Stage $stage $next
+            if($i -lt $end){Manual-Boundary 'Unlock Android after Magisk reboot, open Magisk, and approve Shell in Magisk Superuser before postflight.'}
         }
         'postflight' {
-            if($WhatIfPreference){Write-Host 'WHATIF: postflight.ps1 read-only health checks'}
+            if($WhatIfPreference){Write-Host 'WHATIF: postflight.ps1 read-only health checks plus su root verification'}
             else {& (Join-Path $PSScriptRoot 'postflight.ps1') -ArtifactsRoot $ArtifactsRoot -AdbPath $AdbPath}
             Save-Stage $stage $next
         }

@@ -113,3 +113,6 @@ Automation stops at physical boundaries that cannot be performed safely over USB
 `rom-install.ps1` is destructive and requires `-AcknowledgeDataLoss`. All mutation stages fail closed on hash/profile/slot/unlock errors. `root-magisk.ps1` patches only the exact ROM boot image and never substitutes a foreign boot image.
 
 See [Root, updates, and recovery](docs/ROOT-AND-UPDATES.md) for OTA/root behavior and the original-boot fallback.
+### Root completion gate
+
+After the Magisk reboot on Android 16, unlock the device normally once before opening Magisk. The final postflight does not treat `magiskd` alone as proof of usable root: it also requires `su -c id` to return `uid=0(root)` after the Shell policy is approved in Magisk Superuser.

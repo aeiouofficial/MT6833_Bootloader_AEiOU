@@ -51,6 +51,8 @@ $radio=Shell 'getprop gsm.sim.state; getprop gsm.network.type'
 Add-Check 'radio-stack' ($radio -match 'LOADED|ABSENT') $radio
 $magisk=Shell 'ps -A | grep -i magiskd'
 Add-Check 'magisk-daemon' ($magisk -match '\bmagiskd\b') $magisk
+$rootId=Shell 'su -c id'
+Add-Check 'root-su' ($rootId -match 'uid=0\(root\)') $rootId
 $crash=Shell 'logcat -b crash -d -v brief'
 Add-Check 'crash-buffer' ($crash -notmatch 'FATAL EXCEPTION|Fatal signal|ANR in ') ($(if($crash){$crash}else{'empty'}))
 $failed=@($results.GetEnumerator() | Where-Object {$_.Value.status -eq 'FAIL'})
