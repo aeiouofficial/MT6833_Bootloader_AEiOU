@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 2,
+  "buildId": "golden-v2-20260917",
+  "apps": [
+    {"name":"Magisk Manager","package":"com.topjohnwu.magisk","version":"30.7","mode":"provision","file":"Magisk.apk","bytes":11613864,"sha256":"e0d32d2123532860f97123d927b1bb86c4e08e6fd8a48bfc6b5bee0afae9ebd5"},
+    {"name":"Obtainium","package":"dev.imranr.obtainium","version":"1.6.17","mode":"provision","file":"Obtainium.apk","bytes":26154026,"sha256":"ce1aa65430af809289f4045994838b1b072a2021bd82fceab1a6f4a90d0108d4"},
+    {"name":"Neo Backup","package":"com.machiav3lli.backup","version":"8.3.18","mode":"provision","file":"NeoBackup.apk","bytes":11521022,"sha256":"1485c964ba52b45c1057c2d6f7299286e456c61109f381d842c094ab5ec7e9c6"},
+    {"name":"Termux","package":"com.termux","version":"0.119.0-beta.3","mode":"system","file":"Termux.apk","bytes":35738948,"sha256":"3bb969df2400d884ccb929b7d79cc76861f291c98942c401e12408d734a460f3","systemDir":"AEiOU_Termux"},
+    {"name":"App Manager","package":"io.github.muntashirakon.AppManager","version":"4.1.1","mode":"provision","file":"AppManager.apk","bytes":28145654,"sha256":"e1f6ba10812c74016ad626e11e27a1ae450aec2c0964a11466abb9e7a9c8ef84"},
+    {"name":"Rethink DNS + Firewall","package":"com.celzero.bravedns","version":"v0.5.6","mode":"provision","file":"Rethink.apk","bytes":34635226,"sha256":"d68c7e3e57c3fd46e6928d2f9e4308bffc72104fbb930b85b0d082aa1207b143"},
+    {"name":"Proton VPN","package":"ch.protonvpn.android","version":"5.20.21.0","mode":"provision","file":"ProtonVPN.apk","bytes":66445841,"sha256":"e1da59f11fad1ef78f915188ca97f0e49300ac5d082885484ec1b29a78f46307"},
+    {"name":"DuressKeyboard","package":"duress.keyboard","version":"7.4","mode":"system","file":"DuressKeyboard.apk","bytes":259168,"sha256":"765f29c40b8324ac74c8776e989eb036a95e384a1507b99b3bd701339949af9a","systemDir":"AEiOU_DuressKeyboard"}
+  ]
+}
