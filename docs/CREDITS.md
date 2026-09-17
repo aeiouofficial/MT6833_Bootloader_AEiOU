@@ -1,6 +1,6 @@
 # Credits and upstream
 
-This toolkit is a thin wrapper around the upstream **mtkclient** project by Bjoern Kerler and contributors:
+This toolkit includes a bundled AEiOU fork of the upstream **mtkclient** project by Bjoern Kerler and contributors, plus AEiOU wrapper scripts and documentation:
 
 - Project: `bkerler/mtkclient`
 - Upstream license: GNU GPL v3
@@ -14,4 +14,4 @@ This repository does not claim authorship of upstream mtkclient, its MediaTek ex
 
 `vendor/mtkclient` contains the exact verified upstream snapshot plus AEiOU stale-state hardening. `setup.ps1` uses this bundled fork directly instead of cloning another copy.
 
-The AEiOU wrapper is MIT-licensed. Files fetched from upstream remain under their upstream license terms.
+The AEiOU wrapper is MIT-licensed. The bundled endor/mtkclient source and loaders remain under upstream GPL-3.0 license terms.

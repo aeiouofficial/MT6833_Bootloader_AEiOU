@@ -18,9 +18,18 @@ Hardware-tested on 2026-09-17:
 
 Other MT6833 devices may behave differently. Do not assume compatibility solely from the chipset name.
 
+## Bundled AEiOU mtkclient fork
+
+`vendor/mtkclient` is the complete source/loader snapshot used by this project, based on upstream `bkerler/mtkclient` commit `cd25cf9c1ff6d36e82697ac2c798e69e9cfb78c3` (2.1.4). It is bundled so users run the same code path that was verified on hardware rather than an arbitrary future checkout.
+
+AEiOU hardening is documented in `vendor/mtkclient/AEIOU_FORK.md`. The key source change is in `mtkclient/Library/DA/mtk_da_handler.py`: persisted `.state` is **not automatically re-used** unless `MTKCLIENT_ALLOW_STATE_REINIT=1` is explicitly set. This prevents the stale-DA `GET_RAM_INFO` failure reproduced during MT6833 debugging. Wrapper scripts additionally back up stale state before fresh sessions.
+
+The vendored fork retains upstream GPL-3.0 licensing. AEiOU wrapper/scripts outside the vendor tree are MIT-licensed.
+
 ## Important warning
 
 Bootloader unlocking changes the device security state. Depending on device/firmware, unlocking can trigger data loss or make a device unbootable if interrupted or misused. Back up important data first. Use this only on devices you own or are authorized to modify.
+
 ## Quick start
 
 Open an **Administrator PowerShell** in this repository:
