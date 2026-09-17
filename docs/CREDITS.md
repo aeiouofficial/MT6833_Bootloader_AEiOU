@@ -14,4 +14,4 @@ This repository does not claim authorship of upstream mtkclient, its MediaTek ex
 
 `vendor/mtkclient` contains the exact verified upstream snapshot plus AEiOU stale-state hardening. `setup.ps1` uses this bundled fork directly instead of cloning another copy.
 
-The AEiOU wrapper is MIT-licensed. The bundled endor/mtkclient source and loaders remain under upstream GPL-3.0 license terms.
+The AEiOU wrapper is MIT-licensed. The bundled `vendor/mtkclient` source and loaders remain under upstream GPL-3.0 license terms.
