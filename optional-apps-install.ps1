@@ -32,9 +32,13 @@ function Get-PinnedArtifact([object]$Entry,[string]$Path){
     if(-not(Test-Path -LiteralPath $Path -PathType Leaf)){
         $tmp=$Path+'.download'
         Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
-        Invoke-WebRequest -UseBasicParsing -Uri ([string]$Entry.url) -OutFile $tmp
-        Assert-ArtifactHash -Path $tmp -ExpectedSha256 ([string]$Entry.sha256)|Out-Null
-        Move-Item -LiteralPath $tmp -Destination $Path -Force
+        try {
+            Invoke-WebRequest -UseBasicParsing -Uri ([string]$Entry.url) -OutFile $tmp
+            Assert-ArtifactHash -Path $tmp -ExpectedSha256 ([string]$Entry.sha256)|Out-Null
+            Move-Item -LiteralPath $tmp -Destination $Path -Force
+        } finally {
+            Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+        }
     }
     Assert-ArtifactHash -Path $Path -ExpectedSha256 ([string]$Entry.sha256)|Out-Null
 }
@@ -48,15 +52,19 @@ foreach($app in $apps){
     $path=Join-Path $ArtifactsRoot ([string]$app.file)
     Get-PinnedArtifact -Entry $app -Path $path
     $bypass=$app.PSObject.Properties['bypassLowTargetSdkBlock'] -and [bool]$app.bypassLowTargetSdkBlock
+    $install=$null
     if($bypass){
         $remote='/data/local/tmp/aeiou-optional-app.apk'
-        $push=Invoke-NativeChecked -FilePath $adb -ArgumentList @('push',$path,$remote)
-        $install=Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','pm','install','--bypass-low-target-sdk-block','-r',$remote)
-        [void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','rm','-f',$remote) -AllowFailure)
+        try {
+            [void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('push',$path,$remote))
+            $install=Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','pm','install','--bypass-low-target-sdk-block','-r',$remote)
+        } finally {
+            [void](Invoke-NativeChecked -FilePath $adb -ArgumentList @('shell','rm','-f',$remote) -AllowFailure)
+        }
     } else {
         $install=Invoke-NativeChecked -FilePath $adb -ArgumentList @('install','-r',$path)
     }
-    if($install.Output -notmatch '(?im)^Success\s*$'){throw "APK install did not report Success for $($app.name):`n$($install.Output)"}
+    if(-not $install -or $install.Output -notmatch '(?im)^Success\s*$'){throw "APK install did not report Success for $($app.name):`n$($install.Output)"}
     $actual=Get-InstalledVersion -Package ([string]$app.package)
     if($actual -ne [string]$app.version){throw "Installed version mismatch for $($app.package). Expected=$($app.version) Actual=$actual"}
     Write-Host "PASS: $($app.name) $actual installed as $($app.package)"
