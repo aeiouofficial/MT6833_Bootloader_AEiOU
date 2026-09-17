@@ -93,3 +93,26 @@ This toolkit backs up stale state before every hardware session and never assume
 ## License
 
 AEiOU wrapper code is MIT-licensed. The bundled `vendor/mtkclient` fork is derived from bkerler/mtkclient and remains GPL-3.0; see `vendor/mtkclient/LICENSE` and `vendor/mtkclient/AEIOU_FORK.md`.
+
+## End-to-end LineageOS + GApps + Magisk workflow
+
+The repository now also contains a guarded continuation path for the hardware-verified Redmi Note 10 5G profile:
+
+```powershell
+.\install-all.ps1 -Manifest .\config\verified-camellia.json `
+  -ArtifactsRoot 'C:\path\to\verified-artifacts' `
+  -AcknowledgeDataLoss
+```
+
+Stages are `preflight -> unlock -> verify -> rom -> gapps -> root -> postflight`. Use `-FromStage`, `-ToStage`, or `-Resume` when continuing an interrupted workflow. Use `-WhatIf` to print the complete requested stage plan without requiring a connected phone or writing workflow state.
+
+The verified manifest pins SHA-256 values for the exact LineageOS 23.2 build, its `boot.img`, the matching MindTheGapps Android 16 arm64 package, and the official stable Magisk APK used for the verified path. Large binaries are intentionally not stored in Git.
+
+Automation stops at physical boundaries that cannot be performed safely over USB: fresh BROM entry, recovery Format Data confirmation, recovery ADB-sideload selection, normal Android setup/USB authorization, and the first Magisk Superuser approval. The PC-side transfer, hash validation, slot validation, flashing, sideload, boot polling, and postflight checks are automated around those gates.
+
+`rom-install.ps1` is destructive and requires `-AcknowledgeDataLoss`. All mutation stages fail closed on hash/profile/slot/unlock errors. `root-magisk.ps1` patches only the exact ROM boot image and never substitutes a foreign boot image.
+
+See [Root, updates, and recovery](docs/ROOT-AND-UPDATES.md) for OTA/root behavior and the original-boot fallback.
+### Root completion gate
+
+After the Magisk reboot on Android 16, unlock the device normally once before opening Magisk. The final postflight does not treat `magiskd` alone as proof of usable root: it also requires `su -c id` to return `uid=0(root)` after the Shell policy is approved in Magisk Superuser.

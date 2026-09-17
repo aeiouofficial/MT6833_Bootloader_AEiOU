@@ -44,3 +44,13 @@ The toolkit pins `bkerler/mtkclient` commit:
 `cd25cf9c1ff6d36e82697ac2c798e69e9cfb78c3`
 
 This was both the hardware-verified revision and upstream HEAD when this repository was created on 2026-09-17. Pinning makes the workflow reproducible; maintainers should re-test hardware before changing it.
+
+## Post-unlock workflow architecture
+
+`src/Workflow.psm1` adds the shared invariants used by the ROM/root stages: A/B slot normalization, artifact SHA-256 gates, verified device-profile matching, ADB/Fastboot state polling, stable Magisk release metadata parsing, Android boot-image validation, sideload evidence parsing, and atomic resume-state handling.
+
+`config/verified-camellia.json` is the hardware-tested artifact contract. A command is not allowed to write a boot partition or sideload an image merely because a filename looks plausible; the local bytes must match the manifest hash first.
+
+The Lineage target has no `init_boot` or separate `recovery` partition. Its recovery-bearing source `boot.img` is Android boot header v2 with a real ramdisk. Consequently the verified Magisk flow patches that exact boot image and selects `boot_a` or `boot_b` only from the live active-slot evidence.
+
+`install-all.ps1` is an orchestrator rather than a bypass layer. Every stage retains its own gates. `-WhatIf` is hardware-free and writes no resume state. Physical BROM/recovery/PIN actions remain explicit human boundaries.

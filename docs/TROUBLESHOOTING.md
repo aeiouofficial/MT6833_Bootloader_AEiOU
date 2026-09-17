@@ -44,3 +44,17 @@ This toolkit deliberately validates upstream output and the process exit code be
 ## Fastboot verification variable unavailable
 
 Some bootloaders do not expose `fastboot getvar unlocked`. `verify.ps1` reports that as inconclusive rather than inventing a result. Keep the mtkclient unlock log and use the bootloader UI / ROM prerequisites as an additional verification path.
+
+## Magisk boots but `su -c id` is denied
+
+If `magiskd` is running as root and the Magisk `su` client reports its version, the patched boot image is active. A first shell root request can still be denied until the user unlocks the phone and approves the Superuser request in the Magisk app.
+
+Do not work around this by bypassing the PIN or changing Android authentication state. Unlock normally, approve the request, and rerun the root verification.
+
+## Lineage update removed root
+
+This is expected when an update replaces the active boot partition. Obtain the source `boot.img` from the exact installed update, verify/update its manifest hash, patch that new image, and flash only the currently active slot. Never reuse the previously patched image for a different ROM build.
+
+## `-WhatIf` / CI behavior
+
+The stage scripts and `install-all.ps1 -WhatIf` are intentionally hardware-free. They validate script/config structure and print the operation plan without ADB/Fastboot access, without large artifact files, and without writing `.aeiou-state`. Actual execution performs the full device/profile/hash gates.

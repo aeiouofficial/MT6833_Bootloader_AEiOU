@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "profile": {
+    "soc": "MT6833",
+    "preRomModels": [
+      "M2103K19G"
+    ],
+    "preRomDevices": [
+      "camellian"
+    ],
+    "postRomModels": [
+      "M2103K19C",
+      "M2103K19G"
+    ],
+    "postRomDevices": [
+      "camellia",
+      "camellian"
+    ],
+    "testedStockFirmware": "V14.0.4.0.TKSEUXM"
+  },
+  "artifacts": {
+    "rom": {
+      "file": "lineage-23.2-20260901-UNOFFICIAL-camellia.zip",
+      "sha256": "49f519e355250e5f1c2e6abe9c5582e5be4aba55a96dd5bbbe8ce8e9f7e2d34b"
+    },
+    "boot": {
+      "file": "boot.img",
+      "sha256": "b0ef438b646e68ad0d274f379475a5b1d1da31dfc9ead862191dd9b9492d87f7"
+    },
+    "gapps": {
+      "file": "MindTheGapps-16.0.0-arm64-20260915_222150.zip",
+      "sha256": "d60f550e4dc96606644fbbf886a9892d1391a607225e861ceaef27bd999bc6a3"
+    },
+    "magisk": {
+      "version": "30.7",
+      "file": "Magisk-v30.7.apk",
+      "url": "https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk",
+      "sha256": "e0d32d2123532860f97123d927b1bb86c4e08e6fd8a48bfc6b5bee0afae9ebd5"
+    }
+  }
+}
