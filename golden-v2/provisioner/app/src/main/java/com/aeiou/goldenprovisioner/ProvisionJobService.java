@@ -133,7 +133,7 @@ public final class ProvisionJobService extends JobService {
         sp.setSize(apk.length());
         sp.setInstallReason(PackageManager.INSTALL_REASON_DEVICE_RESTORE);
         if (Build.VERSION.SDK_INT >= 31) {
-            sp.setInstallScenario(PackageManager.INSTALL_SCENARIO_DEVICE_RESTORE);
+            sp.setInstallScenario(PackageManager.INSTALL_SCENARIO_BULK);
             sp.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED);
         }
         int sessionId = installer.createSession(sp);
