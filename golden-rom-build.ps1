@@ -23,8 +23,11 @@ if($WhatIfPreference){Write-Host "WHATIF: build $candidate from $source and embe
 $script=Join-Path $PSScriptRoot 'scripts\golden-product-build.sh'
 if(-not(Test-Path $script -PathType Leaf)){throw "Golden product builder missing: $script"}
 function Convert-ToWslPath([string]$Path){
-    $r=Invoke-NativeChecked -FilePath 'wsl.exe' -ArgumentList @('-d',$Distro,'-u','root','--','wslpath','-a',$Path)
-    return $r.Output.Trim()
+    $full=[IO.Path]::GetFullPath($Path)
+    if($full -notmatch '^([A-Za-z]):\\(.*)$'){throw "Unsupported Windows path for WSL conversion: $full"}
+    $drive=$Matches[1].ToLowerInvariant()
+    $tail=$Matches[2] -replace '\\','/'
+    return "/mnt/$drive/$tail"
 }
 $scriptWsl=Convert-ToWslPath $script
 $captureWsl=Convert-ToWslPath $CaptureRoot
