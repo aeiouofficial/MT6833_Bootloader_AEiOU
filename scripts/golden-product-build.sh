@@ -21,6 +21,7 @@ cmds="$work/debugfs.cmd"
 : > "$cmds"
 while IFS=$'\t' read -r system_dir apk_name rel_file expected_sha; do
   [[ -n "$system_dir" ]] || continue
+  expected_sha="${expected_sha%$'\r'}"
   src="$capture_root/$rel_file"
   [[ -f "$src" ]] || { echo "missing captured APK: $src" >&2; exit 24; }
   actual_sha="$(sha256sum "$src" | awk '{print $1}')"
@@ -54,6 +55,7 @@ free_bytes=$((free_blocks * block_size))
 (( free_bytes >= 67108864 )) || { echo "candidate product has less than 64 MiB free: $free_bytes" >&2; exit 30; }
 while IFS=$'\t' read -r system_dir apk_name rel_file expected_sha; do
   [[ -n "$system_dir" ]] || continue
+  expected_sha="${expected_sha%$'\r'}"
   dst="/app/$system_dir/$apk_name"
   dumped="$work/${system_dir}.verify.apk"
   debugfs -R "dump -p $dst $dumped" "$candidate" >/dev/null 2>&1 || { echo "cannot dump embedded APK: $dst" >&2; exit 31; }
