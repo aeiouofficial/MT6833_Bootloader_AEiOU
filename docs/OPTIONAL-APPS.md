@@ -27,7 +27,7 @@ The manifest pins the exact version, download URL, SHA-256, Android package name
 
 - Obtainium 1.6.17 (`dev.imranr.obtainium`)
 - Neo Backup 8.3.18 (`com.machiav3lli.backup`)
-- Termux 0.118.3 ARM64 GitHub build (`com.termux`)
+- Termux 0.119.0-beta.3 ARM64, `apt-android-7` official GitHub build (`com.termux`)
 - App Manager 4.1.1 (`io.github.muntashirakon.AppManager`)
 - Rethink DNS + Firewall 0.5.6 ARM64 (`com.celzero.bravedns`)
 - Proton VPN 5.20.21.0 (`ch.protonvpn.android`)
@@ -36,11 +36,17 @@ The manifest pins the exact version, download URL, SHA-256, Android package name
 
 Large APK/ZIP files are downloaded to the artifact directory and are not committed to Git.
 
-## Verification and offline-device behavior
+## Verification and restore behavior
 
 The PC downloads every artifact. The phone does not need Wi-Fi or mobile data for installation, and this stage does not enable or modify Wi-Fi, mobile data, airplane mode, or VPN state.
 
 Before Android changes are made, the script verifies the connected device against the post-ROM MT6833 profile and requires `arm64-v8a`. Every downloaded file must match its pinned SHA-256. After each APK install, `dumpsys package` must report the pinned package version or the stage fails.
+
+The installer is safe to resume after a partial restore: if the exact pinned package version is already present, that package is reported as PASS and is not installed again. This avoids unnecessary package-verifier prompts and repeated work after interrupted runs.
+
+On the verified Android 16 / LineageOS environment, Play Protect can reject ADB installs of the pinned Termux and DuressKeyboard APKs with `INSTALL_FAILED_VERIFICATION_FAILURE`. Those two manifest entries explicitly opt into a bounded workaround: the script records the current values of `verifier_verify_adb_installs` and `package_verifier_enable`, temporarily sets them to `0` only for the hash-pinned installation, and restores the original values in `finally` even if installation fails. No other optional app uses that verifier bypass.
+
+Native `adb` and `fastboot` commands are evaluated by exit code. Normal stderr progress from successful commands is captured as text instead of being treated as a PowerShell failure.
 
 scrcpy is hash-verified before extraction and its executable must report the pinned version before the stage completes.
 
@@ -64,4 +70,4 @@ Advanced users can run the stage entrypoint directly:
   -AdbPath 'C:\path\to\adb.exe'
 ```
 
-The installer is idempotent at the artifact level: existing downloads are reused only when their SHA-256 still matches the manifest. APK installation itself is repeated from the verified artifact so Android signature checks remain authoritative.
+Existing downloads are reused only when their SHA-256 still matches the manifest. Exact installed package versions are skipped; differing or missing versions are installed from the verified artifact and checked again afterward.
