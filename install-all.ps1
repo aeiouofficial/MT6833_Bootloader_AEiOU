@@ -1,21 +1,23 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [ValidateSet('preflight','unlock','verify','rom','gapps','root','postflight')][string]$FromStage='preflight',
-    [ValidateSet('preflight','unlock','verify','rom','gapps','root','postflight')][string]$ToStage='postflight',
+    [ValidateSet('preflight','unlock','verify','rom','gapps','root','postflight','optional-apps')][string]$FromStage='preflight',
+    [ValidateSet('preflight','unlock','verify','rom','gapps','root','postflight','optional-apps')][string]$ToStage='postflight',
     [string]$Manifest,
     [string]$ArtifactsRoot,
     [string]$MtkRoot,
     [string]$AdbPath,
     [string]$FastbootPath,
     [switch]$AcknowledgeDataLoss,
+    [switch]$InstallOptionalApps,
     [switch]$Resume
 )
 $ErrorActionPreference='Stop'
 Import-Module (Join-Path $PSScriptRoot 'src\Workflow.psm1') -Force
 if(-not $Manifest){$Manifest=Join-Path $PSScriptRoot 'config\verified-camellia.json'}
 if(-not $ArtifactsRoot){$ArtifactsRoot=$PSScriptRoot}
+if($InstallOptionalApps -and -not $PSBoundParameters.ContainsKey('ToStage')){$ToStage='optional-apps'}
 $stateRoot=Join-Path $PSScriptRoot '.aeiou-state'
-$stages=@('preflight','unlock','verify','rom','gapps','root','postflight')
+$stages=@('preflight','unlock','verify','rom','gapps','root','postflight','optional-apps')
 $start=[array]::IndexOf($stages,$FromStage); $end=[array]::IndexOf($stages,$ToStage)
 if($start -lt 0 -or $end -lt $start){throw 'Invalid stage range'}
 if($Resume){
@@ -36,6 +38,7 @@ function Manual-Boundary([string]$Message){
 for($i=$start;$i -le $end;$i++){
     $stage=$stages[$i]
     $next=if($i -lt $stages.Count-1){$stages[$i+1]}else{''}
+    if($stage -eq 'postflight' -and ((-not $InstallOptionalApps) -or $end -le $i)){$next=''}
     Write-Host "=== STAGE: $stage ==="
     switch($stage){
         'preflight' {
@@ -80,6 +83,12 @@ for($i=$start;$i -le $end;$i++){
         'postflight' {
             if($WhatIfPreference){Write-Host 'WHATIF: postflight.ps1 read-only health checks plus su root verification'}
             else {& (Join-Path $PSScriptRoot 'postflight.ps1') -ArtifactsRoot $ArtifactsRoot -AdbPath $AdbPath}
+            Save-Stage $stage $next
+        }
+        'optional-apps' {
+            if(-not $InstallOptionalApps){throw 'optional-apps stage requires explicit -InstallOptionalApps'}
+            $args=@{Manifest=$Manifest;ArtifactsRoot=(Join-Path $ArtifactsRoot 'optional-apps');AdbPath=$AdbPath}
+            if($WhatIfPreference){& (Join-Path $PSScriptRoot 'optional-apps-install.ps1') @args -WhatIf}else{& (Join-Path $PSScriptRoot 'optional-apps-install.ps1') @args}
             Save-Stage $stage $next
         }
     }

@@ -4,7 +4,9 @@ $cases=@(
     @('rom-install.ps1',@('-AcknowledgeDataLoss','-WhatIf')),
     @('gapps-install.ps1',@('-WhatIf')),
     @('root-magisk.ps1',@('-WhatIf')),
-    @('install-all.ps1',@('-FromStage','rom','-ToStage','postflight','-AcknowledgeDataLoss','-WhatIf'))
+    @('optional-apps-install.ps1',@('-WhatIf')),
+    @('install-all.ps1',@('-FromStage','rom','-ToStage','postflight','-AcknowledgeDataLoss','-WhatIf')),
+    @('install-all.ps1',@('-FromStage','postflight','-InstallOptionalApps','-WhatIf'))
 )
 foreach($case in $cases){
     $script=Join-Path $root $case[0]

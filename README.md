@@ -88,6 +88,8 @@ This toolkit backs up stale state before every hardware session and never assume
 - [Technical flow](docs/TECHNICAL.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Verified device record](docs/VERIFIED-DEVICE.md)
+- [Root, updates, and recovery](docs/ROOT-AND-UPDATES.md)
+- [Optional post-install app bundle](docs/OPTIONAL-APPS.md)
 - [Upstream/credits](docs/CREDITS.md)
 
 ## License
@@ -96,7 +98,7 @@ AEiOU wrapper code is MIT-licensed. The bundled `vendor/mtkclient` fork is deriv
 
 ## End-to-end LineageOS + GApps + Magisk workflow
 
-The repository now also contains a guarded continuation path for the hardware-verified Redmi Note 10 5G profile:
+The repository also contains a guarded continuation path for the hardware-verified Redmi Note 10 5G profile:
 
 ```powershell
 .\install-all.ps1 -Manifest .\config\verified-camellia.json `
@@ -104,7 +106,7 @@ The repository now also contains a guarded continuation path for the hardware-ve
   -AcknowledgeDataLoss
 ```
 
-Stages are `preflight -> unlock -> verify -> rom -> gapps -> root -> postflight`. Use `-FromStage`, `-ToStage`, or `-Resume` when continuing an interrupted workflow. Use `-WhatIf` to print the complete requested stage plan without requiring a connected phone or writing workflow state.
+The normal stages are `preflight -> unlock -> verify -> rom -> gapps -> root -> postflight`. Use `-FromStage`, `-ToStage`, or `-Resume` when continuing an interrupted workflow. Use `-WhatIf` to print the complete requested stage plan without requiring a connected phone or writing workflow state.
 
 The verified manifest pins SHA-256 values for the exact LineageOS 23.2 build, its `boot.img`, the matching MindTheGapps Android 16 arm64 package, and the official stable Magisk APK used for the verified path. Large binaries are intentionally not stored in Git.
 
@@ -113,6 +115,24 @@ Automation stops at physical boundaries that cannot be performed safely over USB
 `rom-install.ps1` is destructive and requires `-AcknowledgeDataLoss`. All mutation stages fail closed on hash/profile/slot/unlock errors. `root-magisk.ps1` patches only the exact ROM boot image and never substitutes a foreign boot image.
 
 See [Root, updates, and recovery](docs/ROOT-AND-UPDATES.md) for OTA/root behavior and the original-boot fallback.
+
 ### Root completion gate
 
 After the Magisk reboot on Android 16, unlock the device normally once before opening Magisk. The final postflight does not treat `magiskd` alone as proof of usable root: it also requires `su -c id` to return `uid=0(root)` after the Shell policy is approved in Magisk Superuser.
+
+## Optional post-install apps and USB remote control
+
+Add `-InstallOptionalApps` to continue automatically from `postflight` to the optional `optional-apps` stage:
+
+```powershell
+.\install-all.ps1 -Manifest .\config\verified-camellia.json `
+  -ArtifactsRoot 'C:\path\to\verified-artifacts' `
+  -AcknowledgeDataLoss `
+  -InstallOptionalApps
+```
+
+The PC downloads and SHA-256 verifies pinned releases of Obtainium, Neo Backup, Termux, App Manager, Rethink DNS + Firewall, Proton VPN, and DuressKeyboard, then installs the APKs over USB ADB and verifies their package versions. The same stage installs and version-checks the pinned Windows build of scrcpy on the PC.
+
+The phone itself may remain offline while this stage runs: the workflow does not enable Wi-Fi, mobile data, or change airplane/VPN state.
+
+DuressKeyboard is deliberately **installation-only** in automation. The workflow does not activate Device Admin, change the default keyboard, alter lock credentials, configure a duress code, change failed-password wipe limits, or arm a wipe trigger. See [Optional post-install app bundle](docs/OPTIONAL-APPS.md) for the pinned versions, standalone command, VPN-slot caveat, and manual security boundaries.

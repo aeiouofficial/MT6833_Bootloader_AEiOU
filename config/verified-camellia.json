@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "profile": {
     "soc": "MT6833",
     "preRomModels": [
@@ -36,6 +36,75 @@
       "file": "Magisk-v30.7.apk",
       "url": "https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk",
       "sha256": "e0d32d2123532860f97123d927b1bb86c4e08e6fd8a48bfc6b5bee0afae9ebd5"
+    }
+  },
+  "optionalApps": [
+    {
+      "name": "Obtainium",
+      "version": "1.6.17",
+      "package": "dev.imranr.obtainium",
+      "file": "Obtainium-1.6.17-arm64.apk",
+      "url": "https://github.com/ImranR98/Obtainium/releases/download/v1.6.17/app-arm64-v8a-release.apk",
+      "sha256": "ce1aa65430af809289f4045994838b1b072a2021bd82fceab1a6f4a90d0108d4"
+    },
+    {
+      "name": "Neo Backup",
+      "version": "8.3.18",
+      "package": "com.machiav3lli.backup",
+      "file": "Neo_Backup_8.3.18_release.apk",
+      "url": "https://github.com/NeoApplications/Neo-Backup/releases/download/8.3.18/Neo_Backup_8.3.18_release.apk",
+      "sha256": "d2bd2fbd57bf1e99d12a40ba4418e66543a2983742f16b0f3509262f36f7b4f7"
+    },
+    {
+      "name": "Termux",
+      "version": "0.118.3",
+      "package": "com.termux",
+      "file": "termux-app_v0.118.3+github-debug_arm64-v8a.apk",
+      "url": "https://github.com/termux/termux-app/releases/download/v0.118.3/termux-app_v0.118.3%2Bgithub-debug_arm64-v8a.apk",
+      "sha256": "72fdb596045116bf5ba1b5bdf5b26fddb9acc0bd074ad9f2da9eb0ae85e83a4e"
+    },
+    {
+      "name": "App Manager",
+      "version": "4.1.1",
+      "package": "io.github.muntashirakon.AppManager",
+      "file": "AppManager_v4.1.1.apk",
+      "url": "https://github.com/MuntashirAkon/AppManager/releases/download/v4.1.1/AppManager_v4.1.1.apk",
+      "sha256": "2540d6d9352acd8b04d6210140630a380abb1bc46ad4745c89ad97603dee3c40"
+    },
+    {
+      "name": "Rethink DNS + Firewall",
+      "version": "0.5.6",
+      "package": "com.celzero.bravedns",
+      "file": "rethink-67-arm64-v8a.apk",
+      "url": "https://github.com/celzero/rethink-app/releases/download/v0.5.6/rethink-67-arm64-v8a.apk",
+      "sha256": "d68c7e3e57c3fd46e6928d2f9e4308bffc72104fbb930b85b0d082aa1207b143"
+    },
+    {
+      "name": "Proton VPN",
+      "version": "5.20.21.0",
+      "package": "ch.protonvpn.android",
+      "file": "ProtonVPN-5.20.21.0.apk",
+      "url": "https://github.com/ProtonVPN/android-app/releases/download/5.20.21.0/ProtonVPN-5.20.21.0.605202100.-production-vanilla-direct-release.apk",
+      "sha256": "fa9210ca33c6610e9ad0176930a15561261824cecd72d6ae21995a4a5c24d83a"
+    },
+    {
+      "name": "DuressKeyboard",
+      "version": "7.4",
+      "package": "duress.keyboard",
+      "file": "DuressKeyboard-v7.4.apk",
+      "url": "https://github.com/pofesk0/DuressKeyboard/releases/download/v7.4/app-release.apk",
+      "sha256": "765f29c40b8324ac74c8776e989eb036a95e384a1507b99b3bd701339949af9a",
+      "bypassLowTargetSdkBlock": true,
+      "requiresManualSetup": true
+    }
+  ],
+  "pcTools": {
+    "scrcpy": {
+      "version": "4.1",
+      "file": "scrcpy-win64-v4.1.zip",
+      "url": "https://github.com/Genymobile/scrcpy/releases/download/v4.1/scrcpy-win64-v4.1.zip",
+      "sha256": "5b12172b3264b2889f4583ee64752ce832e29bc8b1089dca81093459697165db",
+      "executable": "scrcpy-win64-v4.1\\scrcpy.exe"
     }
   }
 }

@@ -3,12 +3,13 @@ $root=Split-Path $PSScriptRoot -Parent
 Set-Location $root
 $files=@(
     'setup.ps1','preflight.ps1','unlock.ps1','verify.ps1',
-    'rom-install.ps1','gapps-install.ps1','root-magisk.ps1','postflight.ps1','install-all.ps1',
+    'rom-install.ps1','gapps-install.ps1','root-magisk.ps1','postflight.ps1','optional-apps-install.ps1','install-all.ps1',
     'src\Toolkit.psm1','src\Workflow.psm1',
     'tests\test-toolkit.ps1','tests\test-entrypoints.ps1','tests\test-fork.ps1',
     'tests\test-public-safety.ps1','tests\test-workflow.ps1','tests\test-state.ps1',
     'tests\test-rom-gapps.ps1','tests\test-root-magisk.ps1','tests\test-postflight.ps1',
-    'tests\test-install-all.ps1','tests\test-dry-run.ps1','tests\test-write-boundaries.ps1'
+    'tests\test-install-all.ps1','tests\test-optional-apps.ps1','tests\test-optional-apps-behavior.ps1',
+    'tests\test-dry-run.ps1','tests\test-write-boundaries.ps1'
 )
 foreach($file in $files){
     $tokens=$null;$errors=$null
@@ -19,7 +20,8 @@ foreach($file in $files){
 $tests=@(
     'test-toolkit.ps1','test-entrypoints.ps1','test-fork.ps1','test-public-safety.ps1',
     'test-workflow.ps1','test-state.ps1','test-rom-gapps.ps1','test-root-magisk.ps1',
-    'test-postflight.ps1','test-install-all.ps1','test-dry-run.ps1','test-write-boundaries.ps1'
+    'test-postflight.ps1','test-install-all.ps1','test-optional-apps.ps1','test-optional-apps-behavior.ps1',
+    'test-dry-run.ps1','test-write-boundaries.ps1'
 )
 foreach($test in $tests){
     Write-Host "=== $test ==="
