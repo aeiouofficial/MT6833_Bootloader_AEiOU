@@ -1,0 +1,52 @@
+name: Golden ROM v2
+
+on:
+  push:
+    branches: [feat/golden-rom-v2-provisioner]
+  pull_request:
+    paths:
+      - 'golden-v2/**'
+      - 'tests/test-golden-v2.ps1'
+      - '.github/workflows/golden-v2.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Install Android SDK 36
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Golden v2 contract
+        shell: pwsh
+        run: ./tests/test-golden-v2.ps1
+      - name: Build provisioner
+        shell: bash
+        run: gradle -p golden-v2/provisioner :app:assembleDebug --stacktrace
+      - name: Android lint
+        shell: bash
+        run: gradle -p golden-v2/provisioner :app:lintDebug --stacktrace
+      - name: Audit built manifest
+        shell: bash
+        run: |
+          APK=golden-v2/provisioner/app/build/outputs/apk/debug/app-debug.apk
+          AAPT2="$ANDROID_HOME/build-tools/36.0.0/aapt2"
+          "$AAPT2" dump permissions "$APK" | tee /tmp/perms.txt
+          grep -Fq 'android.permission.INSTALL_PACKAGES' /tmp/perms.txt
+          ! grep -Eq 'BIND_DEVICE_ADMIN|DELETE_PACKAGES|REQUEST_DELETE_PACKAGES' /tmp/perms.txt
+          "$AAPT2" dump xmltree "$APK" AndroidManifest.xml | tee /tmp/manifest.txt
+          ! grep -Eq 'android.intent.action.INSTALL_PACKAGE|DEVICE_ADMIN|wipeData' /tmp/manifest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: golden-v2-provisioner-debug
+          path: golden-v2/provisioner/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
