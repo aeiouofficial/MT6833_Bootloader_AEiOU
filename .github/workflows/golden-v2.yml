@@ -45,7 +45,7 @@ jobs:
           "$AAPT2" dump permissions "$APK" | tee /tmp/perms.txt
           grep -Fq 'android.permission.INSTALL_PACKAGES' /tmp/perms.txt
           ! grep -Eq 'BIND_DEVICE_ADMIN|DELETE_PACKAGES|REQUEST_DELETE_PACKAGES' /tmp/perms.txt
-          "$AAPT2" dump xmltree "$APK" AndroidManifest.xml | tee /tmp/manifest.txt
+          "$AAPT2" dump xmltree --file AndroidManifest.xml "$APK" | tee /tmp/manifest.txt
           ! grep -Eq 'android.intent.action.INSTALL_PACKAGE|DEVICE_ADMIN|wipeData' /tmp/manifest.txt
       - uses: actions/upload-artifact@v4
         with:
