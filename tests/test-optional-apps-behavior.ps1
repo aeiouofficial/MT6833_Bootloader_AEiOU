@@ -11,7 +11,7 @@ try {
     $adb=Join-Path $temp 'adb.cmd'
     @'
 @echo off
-if not "%AEIOU_FAKE_ADB_LOG%"=="" echo %*>>"%AEIOU_FAKE_ADB_LOG%"
+if not "%AEIOU_FAKE_ADB_LOG%"=="" echo [%*]>>"%AEIOU_FAKE_ADB_LOG%"
 if "%1"=="devices" (echo List of devices attached&echo testserial device&exit /b 0)
 if "%1"=="get-serialno" (echo testserial&exit /b 0)
 if "%1"=="push" (echo 1 file pushed&exit /b 0)
